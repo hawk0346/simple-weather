@@ -89,7 +89,7 @@ app.get("/weather", async (context) => {
     "current",
     "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
   );
-  forecastUrl.searchParams.set("timezone", "auto");
+  forecastUrl.searchParams.set("timezone", "Asia/Tokyo");
 
   const forecastResponse = await fetch(forecastUrl);
   if (!forecastResponse.ok) {

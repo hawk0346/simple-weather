@@ -15,6 +15,11 @@ type WeatherResponse = {
   message?: string;
 };
 
+function formatObservedAtJst(raw: string): string {
+  const normalized = raw.trim().replace("T", " ");
+  return normalized.length >= 16 ? normalized.slice(0, 16) : normalized;
+}
+
 export default function App() {
   const [city, setCity] = useState("Tokyo");
   const [loading, setLoading] = useState(false);
@@ -80,7 +85,7 @@ export default function App() {
           <p>気温: {data.current.temperatureC} °C</p>
           <p>湿度: {data.current.humidity ?? "-"}%</p>
           <p>風速: {data.current.windSpeed ?? "-"} km/h</p>
-          <p>観測時刻: {data.current.time}</p>
+          <p>観測時刻: {formatObservedAtJst(data.current.time)}</p>
         </section>
       ) : null}
     </main>
