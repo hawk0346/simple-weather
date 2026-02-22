@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 
 const app = new Hono();
+const FETCH_TIMEOUT_MS = 5000;
 
 const geocodingResponseSchema = z.object({
   results: z
@@ -32,7 +33,12 @@ app.get("/health", (context) => {
 
 app.get("/weather", async (context) => {
   const querySchema = z.object({
-    city: z.string().min(1),
+    city: z
+      .string()
+      .trim()
+      .min(1)
+      .max(100)
+      .regex(/^[\p{L}\p{N}\s\-'.]+$/u, "invalid city format"),
   });
 
   const parsed = querySchema.safeParse({
@@ -49,7 +55,7 @@ app.get("/weather", async (context) => {
     );
   }
 
-  const city = parsed.data.city.trim();
+  const city = parsed.data.city;
 
   const geocodingUrl = new URL("https://geocoding-api.open-meteo.com/v1/search");
   geocodingUrl.searchParams.set("name", city);
@@ -57,7 +63,7 @@ app.get("/weather", async (context) => {
   geocodingUrl.searchParams.set("language", "ja");
   geocodingUrl.searchParams.set("format", "json");
 
-  const geocodingResponse = await fetch(geocodingUrl);
+  const geocodingResponse = await fetchWithGuard(geocodingUrl);
   if (!geocodingResponse.ok) {
     return context.json(
       {
@@ -91,7 +97,7 @@ app.get("/weather", async (context) => {
   );
   forecastUrl.searchParams.set("timezone", "Asia/Tokyo");
 
-  const forecastResponse = await fetch(forecastUrl);
+  const forecastResponse = await fetchWithGuard(forecastUrl);
   if (!forecastResponse.ok) {
     return context.json(
       {
@@ -132,3 +138,17 @@ export default {
   port: Number(process.env.PORT ?? 8787),
   fetch: app.fetch,
 };
+
+async function fetchWithGuard(url: URL): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  try {
+    return await fetch(url, {
+      signal: controller.signal,
+      redirect: "error",
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
