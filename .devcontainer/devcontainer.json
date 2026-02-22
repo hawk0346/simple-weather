@@ -1,0 +1,33 @@
+{
+  "name": "bun-react-dev",
+  "image": "oven/bun:latest",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "postCreateCommand": "git config --global --add safe.directory /workspace && bun install",
+  "postStartCommand": "git config --global --get-all safe.directory | grep -qx '/workspace' || git config --global --add safe.directory /workspace",
+  "forwardPorts": [3000, 8787],
+  "portsAttributes": {
+    "3000": {
+      "label": "Vite",
+      "onAutoForward": "openBrowser"
+    },
+    "8787": {
+      "label": "Hono API",
+      "onAutoForward": "silent"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {},
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  },
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
+  ],
+  "workspaceFolder": "/workspace"
+}
