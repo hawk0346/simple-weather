@@ -1,8 +1,37 @@
 import { Hono } from "hono";
+// @ts-ignore - kuroshiro lacks type definitions
+import Kuroshiro from "kuroshiro";
+// @ts-ignore - kuroshiro-analyzer-kuromoji lacks type definitions
+import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji";
 import { z } from "zod";
 
 const app = new Hono();
 const FETCH_TIMEOUT_MS = 5000;
+
+// Initialize Kuroshiro with Kuromoji analyzer
+const kuroshiro = new Kuroshiro();
+let kuroshiroReady = false;
+let initError: Error | null = null;
+
+// Initialize kuroshiro on startup with proper error handling
+kuroshiro
+  .init(new KuromojiAnalyzer())
+  .then(() => {
+    kuroshiroReady = true;
+    console.log("Kuroshiro initialized successfully");
+  })
+  .catch((error: Error) => {
+    initError = error;
+    console.error("Failed to initialize Kuroshiro:", error);
+  });
+
+// Normalize romaji long vowels
+function normalizeRomaji(romaji: string): string {
+  return romaji
+    .toLowerCase()
+    .replace(/oo/g, "o")
+    .replace(/([aiueo])u(?=[a-z]|$)/g, "$1");
+}
 
 const geocodingResponseSchema = z.object({
   results: z
@@ -29,6 +58,81 @@ const forecastResponseSchema = z.object({
 
 app.get("/health", (context) => {
   return context.json({ ok: true });
+});
+
+app.post("/convert-to-romaji", async (context) => {
+  if (initError) {
+    return context.json(
+      {
+        ok: false,
+        message: "Converter initialization failed",
+      },
+      500,
+    );
+  }
+
+  if (!kuroshiroReady) {
+    return context.json(
+      {
+        ok: false,
+        message: "Converter not ready",
+      },
+      503,
+    );
+  }
+
+  const bodySchema = z.object({
+    text: z.string().min(1).max(100),
+  });
+
+  let body: unknown;
+  try {
+    body = (await context.req.json()) as unknown;
+  } catch {
+    return context.json(
+      {
+        ok: false,
+        message: "Invalid JSON",
+      },
+      400,
+    );
+  }
+
+  const parsed = bodySchema.safeParse(body);
+  if (!parsed.success) {
+    return context.json(
+      {
+        ok: false,
+        message: "Invalid request",
+      },
+      400,
+    );
+  }
+
+  try {
+    // Convert kanji to hiragana
+    const hiragana = await kuroshiro.convert(parsed.data.text, {
+      to: "hiragana",
+    });
+
+    // Convert hiragana to romaji
+    const { toRomaji } = await import("wanakana");
+    const romaji = normalizeRomaji(toRomaji(hiragana));
+
+    return context.json({
+      ok: true,
+      romaji,
+    });
+  } catch (error) {
+    console.error("Conversion error:", error);
+    return context.json(
+      {
+        ok: false,
+        message: "Conversion failed",
+      },
+      500,
+    );
+  }
 });
 
 app.get("/weather", async (context) => {
@@ -144,6 +248,17 @@ app.get("/weather", async (context) => {
     },
   });
 });
+
+// Graceful shutdown handling
+const gracefulShutdown = () => {
+  console.log("\nShutting down gracefully...");
+  process.exit(0);
+};
+
+if (process.env.BUN_ENV !== "browser") {
+  process.on("SIGINT", gracefulShutdown);
+  process.on("SIGTERM", gracefulShutdown);
+}
 
 export default {
   port: Number(process.env.PORT ?? 8787),

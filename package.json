@@ -38,9 +38,12 @@
   },
   "dependencies": {
     "hono": "^4.9.8",
+    "kuroshiro": "^1.2.0",
+    "kuroshiro-analyzer-kuromoji": "^1.1.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tailwind-variants": "^3.2.2",
+    "wanakana": "^5.3.1",
     "zod": "^4.1.5"
   }
 }
