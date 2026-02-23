@@ -22,7 +22,7 @@
 - `bun run build` が成功する状態
 - `bun run dev:all` でフロント + API 同時起動可能
 - `hono` / `zod` / `@biomejs/biome` / `knip` を追加済み
-- `src/server/index.ts` に最小 API（`/health`, `/weather`）を追加済み
+- `src/backend/index.ts` に最小 API（`/health`, `/weather`）を追加済み
 - `/weather` は **Open-Meteo** 連携済み（APIキー不要）
 
 ## 直近で実施すること（再開手順）

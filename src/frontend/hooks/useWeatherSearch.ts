@@ -35,7 +35,7 @@ function resolveErrorMessage(
 }
 
 export function useWeatherSearch() {
-  const [city, setCity] = useState("Tokyo");
+  const [city, setCity] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<WeatherResponse | null>(null);

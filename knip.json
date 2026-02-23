@@ -1,12 +1,5 @@
 {
-  "entry": [
-    "src/index.tsx",
-    "src/server/index.ts"
-  ],
-  "project": [
-    "**/*.{ts,tsx}"
-  ],
-  "ignore": [
-    "dist/**"
-  ]
+  "entry": ["src/frontend/index.tsx", "src/backend/index.ts"],
+  "project": ["**/*.{ts,tsx}"],
+  "ignore": ["dist/**"]
 }

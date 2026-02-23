@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @source "./**/*.{ts,tsx}";
-@source "../index.html";
+@source "../../index.html";
 
 body {
   margin: 0;
