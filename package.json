@@ -1,6 +1,5 @@
 {
   "name": "simple-weather",
-  "module": "index.ts",
   "type": "module",
   "private": true,
   "scripts": {
@@ -15,6 +14,7 @@
     "knip": "knip"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.0",
     "@biomejs/biome": "^1.9.4",
     "@types/bun": "latest",
     "@types/node": "^25.3.0",

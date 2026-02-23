@@ -86,7 +86,16 @@ app.get("/weather", async (context) => {
     );
   }
 
-  const location = geocodingParsed.data.results[0]!;
+  const location = geocodingParsed.data.results?.[0];
+  if (!location) {
+    return context.json(
+      {
+        ok: false,
+        message: "City not found",
+      },
+      404,
+    );
+  }
 
   const forecastUrl = new URL("https://api.open-meteo.com/v1/forecast");
   forecastUrl.searchParams.set("latitude", String(location.latitude));

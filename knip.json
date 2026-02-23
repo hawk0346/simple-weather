@@ -1,6 +1,5 @@
 {
   "entry": [
-    "index.ts",
     "src/index.tsx",
     "src/server/index.ts"
   ],
