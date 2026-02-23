@@ -9,6 +9,8 @@
     "dev:api": "bun --watch src/server/index.ts",
     "dev:all": "concurrently -k -n web,api -c blue,green \"bun run dev\" \"bun run dev:api\"",
     "api": "bun src/server/index.ts",
+    "ai:preflight": "bash .copilot-local/run-preflight.sh",
+    "ai:prompt": "cat .copilot-local/prompt-template.md",
     "lint": "biome check .",
     "format": "biome format --write .",
     "knip": "knip"
