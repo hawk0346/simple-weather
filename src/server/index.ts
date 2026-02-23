@@ -57,7 +57,9 @@ app.get("/weather", async (context) => {
 
   const city = parsed.data.city;
 
-  const geocodingUrl = new URL("https://geocoding-api.open-meteo.com/v1/search");
+  const geocodingUrl = new URL(
+    "https://geocoding-api.open-meteo.com/v1/search",
+  );
   geocodingUrl.searchParams.set("name", city);
   geocodingUrl.searchParams.set("count", "1");
   geocodingUrl.searchParams.set("language", "ja");

@@ -18,25 +18,25 @@
 ## AI補助コマンド（ローカル開発用）
 - 常時ルール: `.github/copilot-instructions.md`
 	- Copilot が参照するリポジトリ固有ルール（最小差分、UI制約、SVG `xmlns`、色は `tailwind-variants` など）
-- テンプレート表示: `bun run ai:prompt`
-	- AIに渡す依頼文の雛形（`.copilot-local/prompt-template.md`）を表示
-- 事前チェック実行: `bun run ai:preflight`
-	- `lint` / `typecheck` / `build` を実行し、要約を生成
+- 実行コマンド: `bun run ai:request`
+	- 事前チェックと依頼バンドル生成を1コマンドで実行
 	- 生成物:
 		- `.copilot-local/out/preflight-summary.md`
 		- `.copilot-local/out/preflight.log`
-- 依頼バンドル生成: `bun run ai:bundle`
-	- 生成物:
 		- `.copilot-local/out/request-bundle.md`
-	- `preflight-summary` とコスト抑制ルールを1つにまとめ、AIへの貼り付けを1回で済ませる
 
 ### 推奨フロー
-1. `bun run ai:preflight`
-2. `bun run ai:bundle`
-3. `bun run ai:prompt` を参考に要件を補完
-4. `.copilot-local/out/request-bundle.md` を AI に貼り付けて依頼
+1. `.copilot-local/prompt-template.md` に要件を記入
+2. `bun run ai:request`
+3. `.copilot-local/out/request-bundle.md` の `Paste script` を AI に貼り付けて依頼
+4. 実装後に以下を実行して確認
+	- `bunx biome check src`
+	- `bunx tsc --noEmit`
+	- `bun run knip`
 
 ### 終了コードについて
-- `ai:prompt` は通常 `exit=0`
-- `ai:preflight` はチェック失敗時に `exit=1`（想定動作）
-- `ai:bundle` は `preflight-summary` が無い場合 `exit=1`
+- `ai:request` は preflight が失敗しても `request-bundle` 生成まで続行
+
+### preflight `status` の意味
+- `status: PASS` は preflight の `lint` / `typecheck` / `build` がすべて成功
+- `status: FAIL` は上記のいずれかが失敗（`request-bundle` 生成の失敗ではない）
