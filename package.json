@@ -11,6 +11,7 @@
     "api": "bun src/server/index.ts",
     "ai:preflight": "bash .copilot-local/run-preflight.sh",
     "ai:prompt": "cat .copilot-local/prompt-template.md",
+    "ai:bundle": "bash .copilot-local/build-request-bundle.sh",
     "lint": "biome check .",
     "format": "biome format --write .",
     "knip": "knip"
