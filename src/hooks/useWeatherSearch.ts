@@ -3,12 +3,35 @@ import type { FormEvent } from "react";
 import { toRomaji } from "wanakana";
 import type { WeatherResponse } from "../types/weather";
 
+const NOT_FOUND_MESSAGE = "検索結果がヒットしませんでした。";
+const WEATHER_FETCH_ERROR_MESSAGE = "天気情報の取得に失敗しました";
+const API_CONNECTION_ERROR_MESSAGE = "API サーバーへ接続できませんでした";
+
 // Normalize romaji long vowels (oo→o, ou→o, uu→u, etc.)
 function normalizeRomaji(romaji: string): string {
   return romaji
     .toLowerCase()
     .replace(/oo/g, "o")
     .replace(/([aiueo])u(?=[a-z]|$)/g, "$1");
+}
+
+function buildWeatherQuery(romajiCity: string, originalCity: string): string {
+  const params = new URLSearchParams({
+    city: romajiCity,
+    originalCity,
+  });
+  return `/api/weather?${params.toString()}`;
+}
+
+function resolveErrorMessage(
+  responseStatus: number,
+  payload: WeatherResponse,
+): string {
+  if (responseStatus === 404) {
+    return NOT_FOUND_MESSAGE;
+  }
+
+  return payload.message ?? WEATHER_FETCH_ERROR_MESSAGE;
 }
 
 export function useWeatherSearch() {
@@ -51,24 +74,23 @@ export function useWeatherSearch() {
     setError(null);
 
     try {
+      const originalCity = normalizedCity;
       // Convert Japanese to romaji
       const romajiCity = await convertToRomaji(normalizedCity);
 
-      const response = await fetch(
-        `/api/weather?city=${encodeURIComponent(romajiCity)}`,
-      );
+      const response = await fetch(buildWeatherQuery(romajiCity, originalCity));
       const json = (await response.json()) as WeatherResponse;
 
       if (!response.ok || !json.ok) {
         setData(null);
-        setError(json.message ?? "天気情報の取得に失敗しました");
+        setError(resolveErrorMessage(response.status, json));
         return;
       }
 
       setData(json);
     } catch {
       setData(null);
-      setError("API サーバーへ接続できませんでした");
+      setError(API_CONNECTION_ERROR_MESSAGE);
     } finally {
       setLoading(false);
     }

@@ -7,6 +7,8 @@ import { z } from "zod";
 
 const app = new Hono();
 const FETCH_TIMEOUT_MS = 5000;
+const NOT_FOUND_MESSAGE = "検索結果がヒットしませんでした。";
+const GEOCODING_FETCH_ERROR_MESSAGE = "Failed to fetch geocoding data";
 
 // Initialize Kuroshiro with Kuromoji analyzer
 const kuroshiro = new Kuroshiro();
@@ -33,6 +35,57 @@ function normalizeRomaji(romaji: string): string {
     .replace(/([aiueo])u(?=[a-z]|$)/g, "$1");
 }
 
+// Prefecture to representative city mapping (47 prefectures)
+const prefectureToCity: Record<string, string> = {
+  hokkaido: "sapporo",
+  aomori: "aomori",
+  iwate: "morioka",
+  miyagi: "sendai",
+  akita: "akita",
+  yamagata: "yamagata",
+  fukushima: "fukushima",
+  ibaraki: "mito",
+  tochigi: "utsunomiya",
+  gunma: "maebashi",
+  saitama: "saitama",
+  chiba: "chiba",
+  tokyo: "tokyo",
+  kanagawa: "yokohama",
+  niigata: "niigata",
+  toyama: "toyama",
+  ishikawa: "kanazawa",
+  fukui: "fukui",
+  yamanashi: "kofu",
+  nagano: "nagano",
+  gifu: "gifu",
+  shizuoka: "shizuoka",
+  aichi: "nagoya",
+  mie: "tsu",
+  shiga: "otsu",
+  kyoto: "kyoto",
+  osaka: "osaka",
+  hyogo: "kobe",
+  nara: "nara",
+  wakayama: "wakayama",
+  tottori: "tottori",
+  shimane: "matsue",
+  okayama: "okayama",
+  hiroshima: "hiroshima",
+  yamaguchi: "yamaguchi",
+  tokushima: "tokushima",
+  kagawa: "takamatsu",
+  ehime: "matsuyama",
+  kochi: "kochi",
+  fukuoka: "fukuoka",
+  saga: "saga",
+  nagasaki: "nagasaki",
+  kumamoto: "kumamoto",
+  oita: "oita",
+  miyazaki: "miyazaki",
+  kagoshima: "kagoshima",
+  okinawa: "naha",
+};
+
 const geocodingResponseSchema = z.object({
   results: z
     .array(
@@ -55,6 +108,63 @@ const forecastResponseSchema = z.object({
     wind_speed_10m: z.number().optional(),
   }),
 });
+
+type SearchLocation = {
+  name: string;
+  latitude: number;
+  longitude: number;
+  country?: string;
+};
+
+type SearchSuccess = {
+  ok: true;
+  location: SearchLocation;
+  isPrefectureSubstitute: boolean;
+};
+
+type SearchFailure = {
+  ok: false;
+  error: string;
+  status: 404 | 502;
+};
+
+type SearchResult = SearchSuccess | SearchFailure;
+
+function buildGeocodingUrl(cityName: string): URL {
+  const geocodingUrl = new URL(
+    "https://geocoding-api.open-meteo.com/v1/search",
+  );
+  geocodingUrl.searchParams.set("name", cityName);
+  geocodingUrl.searchParams.set("count", "1");
+  geocodingUrl.searchParams.set("language", "ja");
+  geocodingUrl.searchParams.set("format", "json");
+  geocodingUrl.searchParams.set("countryCode", "JP");
+  return geocodingUrl;
+}
+
+function buildFallbackNotice(
+  originalCity: string,
+  locationName: string,
+): string {
+  return `「${originalCity}」が見つからなかったため、主要都市（${locationName}）で検索しています。`;
+}
+
+async function fetchGeocodingResults(
+  cityName: string,
+): Promise<SearchLocation[] | SearchFailure> {
+  const geocodingResponse = await fetchWithGuard(buildGeocodingUrl(cityName));
+  if (!geocodingResponse.ok) {
+    return {
+      ok: false,
+      error: GEOCODING_FETCH_ERROR_MESSAGE,
+      status: 502,
+    };
+  }
+
+  const geocodingJson = await geocodingResponse.json();
+  const geocodingParsed = geocodingResponseSchema.safeParse(geocodingJson);
+  return geocodingParsed.success ? (geocodingParsed.data.results ?? []) : [];
+}
 
 app.get("/health", (context) => {
   return context.json({ ok: true });
@@ -135,6 +245,48 @@ app.post("/convert-to-romaji", async (context) => {
   }
 });
 
+// Helper function to search for city, with fallback to prefecture representative city
+async function searchCityWithFallback(cityName: string): Promise<SearchResult> {
+  const normalizedCity = cityName.toLowerCase();
+  let isPrefectureSubstitute = false;
+
+  // First attempt: search for the exact city name
+  const firstResults = await fetchGeocodingResults(normalizedCity);
+  if (!Array.isArray(firstResults)) {
+    return firstResults;
+  }
+
+  let location = firstResults[0];
+
+  // If no results and the city might be a prefecture, try the representative city
+  if (!location && prefectureToCity[normalizedCity]) {
+    isPrefectureSubstitute = true;
+    const representativeCity = prefectureToCity[normalizedCity];
+
+    // Second attempt: search using the representative city
+    const secondResults = await fetchGeocodingResults(representativeCity);
+    if (!Array.isArray(secondResults)) {
+      return secondResults;
+    }
+
+    location = secondResults[0];
+  }
+
+  if (!location) {
+    return {
+      ok: false,
+      error: NOT_FOUND_MESSAGE,
+      status: 404,
+    };
+  }
+
+  return {
+    ok: true,
+    location,
+    isPrefectureSubstitute,
+  };
+}
+
 app.get("/weather", async (context) => {
   const querySchema = z.object({
     city: z
@@ -143,10 +295,12 @@ app.get("/weather", async (context) => {
       .min(1)
       .max(100)
       .regex(/^[\p{L}\p{N}\s\-'.]+$/u, "invalid city format"),
+    originalCity: z.string().trim().min(1).max(100).optional(),
   });
 
   const parsed = querySchema.safeParse({
     city: context.req.query("city"),
+    originalCity: context.req.query("originalCity"),
   });
 
   if (!parsed.success) {
@@ -160,48 +314,21 @@ app.get("/weather", async (context) => {
   }
 
   const city = parsed.data.city;
+  const originalCity = parsed.data.originalCity ?? city;
 
-  const geocodingUrl = new URL(
-    "https://geocoding-api.open-meteo.com/v1/search",
-  );
-  geocodingUrl.searchParams.set("name", city);
-  geocodingUrl.searchParams.set("count", "1");
-  geocodingUrl.searchParams.set("language", "ja");
-  geocodingUrl.searchParams.set("format", "json");
-
-  const geocodingResponse = await fetchWithGuard(geocodingUrl);
-  if (!geocodingResponse.ok) {
+  // Use the helper function to search for city with prefecture fallback
+  const searchResult = await searchCityWithFallback(city);
+  if (!searchResult.ok) {
     return context.json(
       {
         ok: false,
-        message: "Failed to fetch geocoding data",
+        message: searchResult.error,
       },
-      502,
+      searchResult.status,
     );
   }
 
-  const geocodingJson = await geocodingResponse.json();
-  const geocodingParsed = geocodingResponseSchema.safeParse(geocodingJson);
-  if (!geocodingParsed.success || !geocodingParsed.data.results?.length) {
-    return context.json(
-      {
-        ok: false,
-        message: "City not found",
-      },
-      404,
-    );
-  }
-
-  const location = geocodingParsed.data.results?.[0];
-  if (!location) {
-    return context.json(
-      {
-        ok: false,
-        message: "City not found",
-      },
-      404,
-    );
-  }
+  const location = searchResult.location;
 
   const forecastUrl = new URL("https://api.open-meteo.com/v1/forecast");
   forecastUrl.searchParams.set("latitude", String(location.latitude));
@@ -239,6 +366,9 @@ app.get("/weather", async (context) => {
     ok: true,
     city: location.name,
     country: location.country,
+    notice: searchResult.isPrefectureSubstitute
+      ? buildFallbackNotice(originalCity, location.name)
+      : undefined,
     current: {
       time: forecastParsed.data.current.time,
       temperatureC: forecastParsed.data.current.temperature_2m,
