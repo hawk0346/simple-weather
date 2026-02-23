@@ -16,6 +16,7 @@
 - List changed files and why each was changed.
 - Avoid unrelated formatting churn.
 - If requirement is ambiguous, ask concise clarifying questions first.
+- Prefer one complete, validated patch over multiple incremental micro-patches.
 
 ## UI and styling rules
 - Keep weather icon color tokens managed via `tailwind-variants`.
