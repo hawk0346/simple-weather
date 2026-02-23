@@ -12,6 +12,9 @@
 - APIのみ: `bun run dev:api`
 - 同時起動: `bun run dev:all`
 
+## Tailwind 運用メモ
+- Tailwind v4 は `src/index.css` の `@source` を正として運用し、`tailwind.config.js` の `content` は重複回避のため使用しない。
+
 ## AI補助コマンド（ローカル開発用）
 - 常時ルール: `.github/copilot-instructions.md`
 	- Copilot が参照するリポジトリ固有ルール（最小差分、UI制約、SVG `xmlns`、色は `tailwind-variants` など）
