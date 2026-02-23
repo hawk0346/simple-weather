@@ -11,6 +11,7 @@
     "api": "bun src/server/index.ts",
     "ai:preflight": "bash .copilot-local/run-preflight.sh",
     "ai:prompt": "cat .copilot-local/prompt-template.md",
+    "ai:bundle": "bash .copilot-local/build-request-bundle.sh",
     "lint": "biome check .",
     "format": "biome format --write .",
     "knip": "knip"
@@ -41,6 +42,7 @@
     "hono": "^4.9.8",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "tailwind-variants": "^3.2.2",
     "zod": "^4.1.5"
   }
 }
