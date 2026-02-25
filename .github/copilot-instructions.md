@@ -1,23 +1,28 @@
-# Copilot Instructions for This Repository
+# このリポジトリ向け Copilot 指示
 
-## Primary goals
-- Keep changes minimal and focused on the user request.
-- Preserve existing architecture and naming unless explicitly requested.
-- Prefer small, reviewable diffs over broad refactors.
+## 基本方針
+- 変更は最小限にし、ユーザー要求に集中する。
+- 明示的な依頼がない限り、既存アーキテクチャと命名を維持する。
+- 広範なリファクタよりも、小さくレビューしやすい差分を優先する。
 
-## Cost-aware workflow (premium request optimization)
-- Before proposing edits, first inspect the smallest necessary file range.
-- Batch related changes in one response instead of many small back-and-forth edits.
-- Reuse existing utilities/hooks/components before introducing new files.
-- When errors occur, show one concrete fix plan and apply it in one pass.
-- Run targeted checks first, then broader checks only if needed.
+## コスト意識のある進め方（premium request 最適化）
+- 編集提案の前に、まず必要最小限の範囲を確認する。
+- 関連する変更は、細かい往復ではなく1回の応答にまとめる。
+- 新規ファイル導入前に、既存の utility / hook / component の再利用を優先する。
+- エラー発生時は、具体的な修正計画を1つ示し、1回で適用する。
+- まず対象を絞ったチェックを行い、必要な場合のみ広範囲チェックへ進む。
 
-## Output expectations
-- List changed files and why each was changed.
-- Avoid unrelated formatting churn.
-- If requirement is ambiguous, ask concise clarifying questions first.
-- Prefer one complete, validated patch over multiple incremental micro-patches.
+## 出力の期待
+- 変更ファイルと、それぞれの変更理由を示す。
+- 無関係な整形差分を避ける。
+- 要件が曖昧な場合は、簡潔な確認質問を先に行う。
+- 細切れの小パッチより、検証済みの一括パッチを優先する。
 
-## UI and styling rules
-- Keep weather icon color tokens managed via `tailwind-variants`.
-- For inline SVG in this repo, keep `xmlns="http://www.w3.org/2000/svg"` explicitly.
+## コードレビュー言語
+- GitHub Copilot のコードレビューコメントは日本語で記述する。
+- 指摘は簡潔にし、具体的な修正案を含める。
+- PR タイトルの改善が必要な場合は、日本語で指摘する。
+
+## UI / スタイルルール
+- 天気アイコンの色トークンは `tailwind-variants` で管理する。
+- このリポジトリの inline SVG では `xmlns="http://www.w3.org/2000/svg"` を明示する。

@@ -2,6 +2,7 @@ export type WeatherResponse = {
   ok: boolean;
   city: string;
   country?: string;
+  notice?: string;
   current: {
     time: string;
     temperatureC: number;

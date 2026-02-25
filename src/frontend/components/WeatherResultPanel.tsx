@@ -23,6 +23,9 @@ export default function WeatherResultPanel({ data }: WeatherResultPanelProps) {
               {data.country ? `, ${data.country}` : ""}
             </h3>
           </header>
+          {data.notice ? (
+            <p className="placeholder-text">{data.notice}</p>
+          ) : null}
           <p>気温: {data.current.temperatureC} °C</p>
           <p>湿度: {data.current.humidity ?? "-"}%</p>
           <p>風速: {data.current.windSpeed ?? "-"} km/h</p>
