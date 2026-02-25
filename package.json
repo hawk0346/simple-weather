@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "bun test",
     "dev:api": "bun --watch src/backend/index.ts",
     "dev:all": "sh -c 'trap \"kill 0\" INT TERM; bun run dev & bun run dev:api & wait'",
     "api": "bun src/backend/index.ts",
