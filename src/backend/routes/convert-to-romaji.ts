@@ -3,10 +3,13 @@ import { convertToRomajiBodySchema } from "../schemas";
 import {
   convertToRomaji,
   getRomajiConverterStatus,
+  waitForRomajiConverterInitialization,
 } from "../services/romaji-converter";
 
 export function registerConvertToRomajiRoute(app: Hono): void {
   app.post("/convert-to-romaji", async (context) => {
+    await waitForRomajiConverterInitialization().catch(() => undefined);
+
     const converterStatus = getRomajiConverterStatus();
 
     if (converterStatus.initError) {
@@ -16,16 +19,6 @@ export function registerConvertToRomajiRoute(app: Hono): void {
           message: "Converter initialization failed",
         },
         500,
-      );
-    }
-
-    if (!converterStatus.ready) {
-      return context.json(
-        {
-          ok: false,
-          message: "Converter not ready",
-        },
-        503,
       );
     }
 

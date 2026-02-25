@@ -17,7 +17,7 @@ export function registerWeatherRoute(app: Hono): void {
       return context.json(
         {
           ok: false,
-          message: "city query is required",
+          message: "市区町村のクエリは必須です。",
         },
         400,
       );
@@ -53,7 +53,8 @@ export function registerWeatherRoute(app: Hono): void {
       return context.json(
         {
           ok: false,
-          message: "Failed to fetch weather data",
+          message:
+            "天気情報サービスへの接続に失敗しました。しばらくしてから再度お試しください。",
         },
         502,
       );
@@ -65,7 +66,8 @@ export function registerWeatherRoute(app: Hono): void {
       return context.json(
         {
           ok: false,
-          message: "Invalid weather data response",
+          message:
+            "天気情報サービスの応答形式が不正です。しばらくしてから再度お試しください。",
         },
         502,
       );

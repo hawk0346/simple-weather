@@ -2,18 +2,11 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { toRomaji } from "wanakana";
 import type { WeatherResponse } from "../types/weather";
+import { normalizeRomaji } from "../../shared/normalize-romaji";
 
 const NOT_FOUND_MESSAGE = "検索結果がヒットしませんでした。";
 const WEATHER_FETCH_ERROR_MESSAGE = "天気情報の取得に失敗しました";
 const API_CONNECTION_ERROR_MESSAGE = "API サーバーへ接続できませんでした";
-
-// Normalize romaji long vowels (oo→o, ou→o, uu→u, etc.)
-function normalizeRomaji(romaji: string): string {
-  return romaji
-    .toLowerCase()
-    .replace(/oo/g, "o")
-    .replace(/([aiueo])u(?=[a-z]|$)/g, "$1");
-}
 
 function buildWeatherQuery(romajiCity: string, originalCity: string): string {
   const params = new URLSearchParams({
@@ -35,7 +28,7 @@ function resolveErrorMessage(
 }
 
 export function useWeatherSearch() {
-  const [city, setCity] = useState("");
+  const [city, setCity] = useState("東京");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<WeatherResponse | null>(null);

@@ -3,7 +3,10 @@ import { fetchWithGuard } from "./http";
 import { prefectureToCity } from "./prefecture-to-city";
 
 const NOT_FOUND_MESSAGE = "検索結果がヒットしませんでした。";
-const GEOCODING_FETCH_ERROR_MESSAGE = "Failed to fetch geocoding data";
+const GEOCODING_FETCH_ERROR_MESSAGE =
+  "位置情報サービスへの接続に失敗しました。しばらくしてから再度お試しください。";
+const GEOCODING_PARSE_ERROR_MESSAGE =
+  "位置情報サービスの応答形式が不正です。しばらくしてから再度お試しください。";
 
 const geocodingResponseSchema = z.object({
   results: z
@@ -65,7 +68,15 @@ async function fetchGeocodingResults(
 
   const geocodingJson = await geocodingResponse.json();
   const geocodingParsed = geocodingResponseSchema.safeParse(geocodingJson);
-  return geocodingParsed.success ? (geocodingParsed.data.results ?? []) : [];
+  if (!geocodingParsed.success) {
+    return {
+      ok: false,
+      error: GEOCODING_PARSE_ERROR_MESSAGE,
+      status: 502,
+    };
+  }
+
+  return geocodingParsed.data.results ?? [];
 }
 
 export async function searchCityWithFallback(
