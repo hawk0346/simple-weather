@@ -39,3 +39,12 @@
 
 ### 開発環境について
 - 開発環境は WSL（POSIX シェル前提）を想定しています
+
+### Copilotレビューを日本語化する設定
+- 本リポジトリには日本語レビュー用の指示ファイルを配置済み:
+	- `.github/copilot-instructions.md`
+	- `.github/instructions/code-review.instructions.md`
+- GitHub のリポジトリ設定で、Copilot code review の custom instructions を有効にする:
+	1. `Settings` → `Copilot` → `Code review`
+	2. `Use custom instructions when reviewing pull requests` を ON
+- PRテンプレートにも「日本語でレビューしてください」を明記しています。
