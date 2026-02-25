@@ -37,6 +37,5 @@
 ### 終了コードについて
 - `ai:request` は preflight が失敗しても `request-bundle` 生成まで続行
 
-### preflight `status` の意味
-- `status: PASS` は preflight の `lint` / `typecheck` / `build` がすべて成功
-- `status: FAIL` は上記のいずれかが失敗（`request-bundle` 生成の失敗ではない）
+### 開発環境について
+- 開発環境は WSL（POSIX シェル前提）を想定しています
