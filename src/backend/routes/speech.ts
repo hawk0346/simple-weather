@@ -1,13 +1,9 @@
 import type { Hono } from "hono";
 import { speechQuerySchema } from "../schemas";
+import { jsonError } from "../services/api-response";
+import { synthesizeVoiceByVoicevox } from "../services/voicevox-speech";
 
 const DEFAULT_SPEAKER = 1;
-const DEFAULT_ENGINE_URL = "http://voicevox-engine:50021";
-
-function buildEngineUrl(path: string): URL {
-  const base = process.env.VOICEVOX_ENGINE_URL ?? DEFAULT_ENGINE_URL;
-  return new URL(path, base.endsWith("/") ? base : `${base}/`);
-}
 
 export function registerSpeechRoute(app: Hono): void {
   app.get("/speech", async (context) => {
@@ -17,62 +13,18 @@ export function registerSpeechRoute(app: Hono): void {
     });
 
     if (!parsed.success) {
-      return context.json(
-        {
-          ok: false,
-          message: "読み上げテキストが不正です。",
-        },
-        400,
-      );
+      return jsonError(context, 400, "読み上げテキストが不正です。");
     }
 
     const speaker = parsed.data.speaker ?? DEFAULT_SPEAKER;
     const text = parsed.data.text;
+    const result = await synthesizeVoiceByVoicevox(text, speaker);
 
-    const audioQueryUrl = buildEngineUrl("audio_query");
-    audioQueryUrl.searchParams.set("speaker", String(speaker));
-    audioQueryUrl.searchParams.set("text", text);
-
-    const audioQueryResponse = await fetch(audioQueryUrl, {
-      method: "POST",
-    });
-
-    if (!audioQueryResponse.ok) {
-      return context.json(
-        {
-          ok: false,
-          message: "VOICEVOXエンジンへの接続に失敗しました。",
-        },
-        502,
-      );
+    if (!result.ok) {
+      return jsonError(context, result.status, result.message);
     }
 
-    const queryJson = await audioQueryResponse.text();
-
-    const synthesisUrl = buildEngineUrl("synthesis");
-    synthesisUrl.searchParams.set("speaker", String(speaker));
-
-    const synthesisResponse = await fetch(synthesisUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: queryJson,
-    });
-
-    if (!synthesisResponse.ok) {
-      return context.json(
-        {
-          ok: false,
-          message: "音声の生成に失敗しました。",
-        },
-        502,
-      );
-    }
-
-    const audioBuffer = await synthesisResponse.arrayBuffer();
-
-    return new Response(audioBuffer, {
+    return new Response(result.audio, {
       status: 200,
       headers: {
         "Content-Type": "audio/wav",

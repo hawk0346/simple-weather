@@ -1,7 +1,19 @@
 import { useEffect, useState } from "react";
+import type { ApiErrorResponse } from "../types/api";
 import type { WeatherResponse } from "../types/weather";
 
 const SPEECH_ERROR_MESSAGE = "読み上げ音声の生成に失敗しました";
+
+async function resolveSpeechErrorMessage(
+  response: Response,
+): Promise<string> {
+  try {
+    const payload = (await response.json()) as ApiErrorResponse;
+    return payload.message || SPEECH_ERROR_MESSAGE;
+  } catch {
+    return SPEECH_ERROR_MESSAGE;
+  }
+}
 
 function resolveWeatherLabel(weatherCode?: number): string {
   if (weatherCode == null) return "不明";
@@ -34,6 +46,18 @@ export function useWeatherSpeech(data: WeatherResponse | null) {
     setSpeechError(null);
   }, [data?.city, data?.current.time]);
 
+  useEffect(() => {
+    if (!speechError) return;
+
+    const timeout = setTimeout(() => {
+      setSpeechError(null);
+    }, 4000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [speechError]);
+
   async function speakWeather() {
     if (!data || speaking) return;
 
@@ -45,7 +69,7 @@ export function useWeatherSpeech(data: WeatherResponse | null) {
       const response = await fetch(`/api/speech?${params.toString()}`);
 
       if (!response.ok) {
-        setSpeechError(SPEECH_ERROR_MESSAGE);
+        setSpeechError(await resolveSpeechErrorMessage(response));
         return;
       }
 

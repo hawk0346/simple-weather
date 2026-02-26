@@ -6,7 +6,6 @@ import { useWeatherSpeech } from "./hooks/useWeatherSpeech";
 export default function App() {
   const { city, setCity, loading, error, data, onSubmit } = useWeatherSearch();
   const { speaking, speechError, speakWeather } = useWeatherSpeech(data);
-  const displayError = speechError ?? error;
 
   return (
     <main className="app">
@@ -20,11 +19,16 @@ export default function App() {
       <SearchPanel
         city={city}
         loading={loading}
-        error={displayError}
+        error={error}
         onCityChange={setCity}
         onSubmit={onSubmit}
       />
       <WeatherResultPanel data={data} speaking={speaking} onSpeak={speakWeather} />
+      {speechError ? (
+        <p className="speech-toast" role="alert" aria-live="assertive">
+          {speechError}
+        </p>
+      ) : null}
     </main>
   );
 }

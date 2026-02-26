@@ -1,5 +1,6 @@
 import type { Hono } from "hono";
 import { forecastResponseSchema, weatherQuerySchema } from "../schemas";
+import { jsonError } from "../services/api-response";
 import { fetchWithGuard } from "../services/http";
 import {
   buildFallbackNotice,
@@ -14,13 +15,7 @@ export function registerWeatherRoute(app: Hono): void {
     });
 
     if (!parsed.success) {
-      return context.json(
-        {
-          ok: false,
-          message: "市区町村のクエリは必須です。",
-        },
-        400,
-      );
+      return jsonError(context, 400, "市区町村のクエリは必須です。");
     }
 
     const city = parsed.data.city;
@@ -28,13 +23,7 @@ export function registerWeatherRoute(app: Hono): void {
 
     const searchResult = await searchCityWithFallback(city);
     if (!searchResult.ok) {
-      return context.json(
-        {
-          ok: false,
-          message: searchResult.error,
-        },
-        searchResult.status,
-      );
+      return jsonError(context, searchResult.status, searchResult.error);
     }
 
     const location = searchResult.location;
@@ -50,26 +39,20 @@ export function registerWeatherRoute(app: Hono): void {
 
     const forecastResponse = await fetchWithGuard(forecastUrl);
     if (!forecastResponse.ok) {
-      return context.json(
-        {
-          ok: false,
-          message:
-            "天気情報サービスへの接続に失敗しました。しばらくしてから再度お試しください。",
-        },
+      return jsonError(
+        context,
         502,
+        "天気情報サービスへの接続に失敗しました。しばらくしてから再度お試しください。",
       );
     }
 
     const forecastJson = await forecastResponse.json();
     const forecastParsed = forecastResponseSchema.safeParse(forecastJson);
     if (!forecastParsed.success) {
-      return context.json(
-        {
-          ok: false,
-          message:
-            "天気情報サービスの応答形式が不正です。しばらくしてから再度お試しください。",
-        },
+      return jsonError(
+        context,
         502,
+        "天気情報サービスの応答形式が不正です。しばらくしてから再度お試しください。",
       );
     }
 

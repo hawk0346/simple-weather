@@ -113,3 +113,16 @@ body {
   margin: 0;
   color: #6b7280;
 }
+
+.speech-toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  max-width: 320px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #b91c1c;
+}
