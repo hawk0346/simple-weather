@@ -40,6 +40,24 @@
 ### 開発環境について
 - 開発環境は WSL（POSIX シェル前提）を想定しています
 
+## VOICEVOX ENGINE を Dev Container で使う
+- このリポジトリは `.devcontainer/docker-compose.yml` で `voicevox-engine` サービスを同時起動する構成です。
+- `dockerd` は Docker のサーバ本体です。`docker` コマンドはこのサーバに接続して動作します。
+- 開発コンテナ内で `dockerd` 直起動が失敗する主因は、Docker daemon が必要とする特権・cgroup・iptables・systemd 前提を満たしにくいためです。
+- 対策として、Docker daemon をコンテナ内で動かさず、Compose のサイドカーとして `voicevox-engine` を起動します。
+
+### 起動手順
+1. Windows 側で Docker Desktop を起動（WSL Integration を有効化）
+2. VS Code で `Dev Containers: Rebuild and Reopen in Container`
+3. コンテナ内で疎通確認
+	- `curl -s http://voicevox-engine:50021/version`
+4. ホストから確認
+	- `curl -s http://127.0.0.1:50021/version`
+
+### アプリからの接続先
+- Dev Container 内: `http://voicevox-engine:50021`
+- 環境変数例: `.env.example` の `VOICEVOX_ENGINE_URL`
+
 ### Copilotレビューを日本語化する設定
 - 本リポジトリには日本語レビュー用の指示ファイルを配置済み:
 	- `.github/copilot-instructions.md`

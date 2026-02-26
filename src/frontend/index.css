@@ -26,6 +26,21 @@ body {
   margin: 0;
 }
 
+.app-header {
+  display: grid;
+  gap: 4px;
+}
+
+.credit-text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.credit-text a {
+  color: inherit;
+}
+
 .search-area,
 .result-area {
   background: #ffffff;

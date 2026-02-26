@@ -1,12 +1,14 @@
 {
   "name": "bun-react-dev",
-  "image": "oven/bun:latest",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "runServices": ["app", "voicevox-engine"],
   "features": {
     "ghcr.io/devcontainers/features/git:1": {}
   },
   "postCreateCommand": "apt update && apt install -y openssh-client && git config --global --add safe.directory /workspace && bun install",
   "postStartCommand": "git config --global --get-all safe.directory | grep -qx '/workspace' || git config --global --add safe.directory /workspace; mkdir -p /root/.ssh; chmod 700 /root/.ssh; if [ -f /tmp/wsl-ssh/id_ed25519 ]; then cp /tmp/wsl-ssh/id_ed25519 /root/.ssh/id_ed25519 && chmod 600 /root/.ssh/id_ed25519; fi; if [ -f /tmp/wsl-ssh/id_ed25519.pub ]; then cp /tmp/wsl-ssh/id_ed25519.pub /root/.ssh/id_ed25519.pub && chmod 644 /root/.ssh/id_ed25519.pub; fi; touch /root/.ssh/known_hosts; ssh-keyscan github.com >> /root/.ssh/known_hosts 2>/dev/null || true",
-  "forwardPorts": [3000, 8787],
+  "forwardPorts": [3000, 8787, 50021],
   "portsAttributes": {
     "3000": {
       "label": "Vite",
@@ -14,6 +16,10 @@
     },
     "8787": {
       "label": "Hono API",
+      "onAutoForward": "silent"
+    },
+    "50021": {
+      "label": "VOICEVOX ENGINE",
       "onAutoForward": "silent"
     }
   },

@@ -1,0 +1,12 @@
+services:
+  app:
+    image: oven/bun:latest
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    volumes:
+      - ..:/workspace:cached
+
+  voicevox-engine:
+    image: voicevox/voicevox_engine:cpu-latest
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:50021:50021
