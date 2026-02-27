@@ -14,6 +14,11 @@ export const weatherQuerySchema = z.object({
   originalCity: z.string().trim().min(1).max(100).optional(),
 });
 
+export const speechQuerySchema = z.object({
+  text: z.string().trim().min(1).max(300),
+  speaker: z.coerce.number().int().positive().max(999999).optional(),
+});
+
 export const forecastResponseSchema = z.object({
   current: z.object({
     time: z.string(),

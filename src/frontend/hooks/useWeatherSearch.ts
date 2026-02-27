@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { toRomaji } from "wanakana";
+import type { ApiErrorResponse } from "../types/api";
 import type { WeatherResponse } from "../types/weather";
 import { normalizeRomaji } from "../../shared/normalize-romaji";
 
@@ -18,7 +19,7 @@ function buildWeatherQuery(romajiCity: string, originalCity: string): string {
 
 function resolveErrorMessage(
   responseStatus: number,
-  payload: WeatherResponse,
+  payload: WeatherResponse | ApiErrorResponse,
 ): string {
   if (responseStatus === 404) {
     return NOT_FOUND_MESSAGE;
@@ -72,7 +73,9 @@ export function useWeatherSearch() {
       const romajiCity = await convertToRomaji(normalizedCity);
 
       const response = await fetch(buildWeatherQuery(romajiCity, originalCity));
-      const json = (await response.json()) as WeatherResponse;
+      const json = (await response.json()) as
+        | WeatherResponse
+        | ApiErrorResponse;
 
       if (!response.ok || !json.ok) {
         setData(null);

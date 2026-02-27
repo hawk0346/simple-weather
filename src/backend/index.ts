@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { registerConvertToRomajiRoute } from "./routes/convert-to-romaji";
 import { registerHealthRoute } from "./routes/health";
+import { registerSpeechRoute } from "./routes/speech";
 import { registerWeatherRoute } from "./routes/weather";
 
 const app = new Hono();
@@ -8,6 +9,7 @@ const app = new Hono();
 registerHealthRoute(app);
 registerConvertToRomajiRoute(app);
 registerWeatherRoute(app);
+registerSpeechRoute(app);
 
 // Graceful shutdown handling
 const gracefulShutdown = () => {
