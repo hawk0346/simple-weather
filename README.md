@@ -1,27 +1,5 @@
 # simple-weather
 
-## 次の開発で使う原型（テンプレート）として利用する
-1. 新しい作業ディレクトリを作成し、このリポジトリをコピー
-2. プロジェクト名を初期化
-	- `bash scripts/init-prototype.sh <new-project-name>`
-3. 依存関係を再インストール
-	- `bun install`
-4. VS Code で `Dev Containers: Rebuild and Reopen in Container`
-
-### GitHub に公開する（新規リポジトリ）
-1. GitHub 上で空のリポジトリを作成（例: `my-next-weather-app`）
-2. ローカルでリモートを差し替え
-	- `git remote remove origin`
-	- `git remote add origin git@github.com:<your-account>/<your-repo>.git`
-3. 初回 push
-	- `git push -u origin HEAD`
-
-### 補足
-- `scripts/init-prototype.sh` は以下を更新します。
-  - `package.json` の `name`
-  - `.devcontainer/devcontainer.json` の `name`
-  - `README.md` 先頭タイトル
-
 ## 再開ガイド
 - 引き継ぎ内容は [HANDOFF.md](HANDOFF.md) を参照
 - 開発コンテナで再開する場合:
