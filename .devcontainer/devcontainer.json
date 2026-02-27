@@ -6,8 +6,8 @@
   "features": {
     "ghcr.io/devcontainers/features/git:1": {}
   },
-  "postCreateCommand": "apt update && apt install -y openssh-client && git config --global --add safe.directory /workspace && bun install",
-  "postStartCommand": "git config --global --get-all safe.directory | grep -qx '/workspace' || git config --global --add safe.directory /workspace; mkdir -p /root/.ssh; chmod 700 /root/.ssh; if [ -f /tmp/wsl-ssh/id_ed25519 ]; then cp /tmp/wsl-ssh/id_ed25519 /root/.ssh/id_ed25519 && chmod 600 /root/.ssh/id_ed25519; fi; if [ -f /tmp/wsl-ssh/id_ed25519.pub ]; then cp /tmp/wsl-ssh/id_ed25519.pub /root/.ssh/id_ed25519.pub && chmod 644 /root/.ssh/id_ed25519.pub; fi; touch /root/.ssh/known_hosts; ssh-keyscan github.com >> /root/.ssh/known_hosts 2>/dev/null || true",
+  "postCreateCommand": "git config --global --add safe.directory /workspace && bun install",
+  "postStartCommand": "git config --global --get-all safe.directory | grep -qx '/workspace' || git config --global --add safe.directory /workspace",
   "forwardPorts": [3000, 8787, 50021],
   "portsAttributes": {
     "3000": {
@@ -32,9 +32,6 @@
       ]
     }
   },
-  "mounts": [
-    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/.ssh,target=/tmp/wsl-ssh,type=bind,readonly"
-  ],
+  "mounts": ["source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"],
   "workspaceFolder": "/workspace"
 }
