@@ -28,7 +28,7 @@ function resolveErrorMessage(
   return payload.message ?? WEATHER_FETCH_ERROR_MESSAGE;
 }
 
-export function useWeatherSearch() {
+export function useWeatherSearch(onSuccess?: (city: string) => void) {
   const [city, setCity] = useState("東京");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +84,7 @@ export function useWeatherSearch() {
       }
 
       setData(json);
+      onSuccess?.(originalCity);
     } catch {
       setData(null);
       setError(API_CONNECTION_ERROR_MESSAGE);

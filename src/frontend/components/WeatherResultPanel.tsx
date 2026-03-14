@@ -36,8 +36,8 @@ export default function WeatherResultPanel({
           <p>湿度: {data.current.humidity ?? "-"}%</p>
           <p>風速: {data.current.windSpeed ?? "-"} km/h</p>
           <p>観測時刻: {formatObservedAtJst(data.current.time)}</p>
-          <button type="button" onClick={onSpeak} disabled={speaking}>
-            {speaking ? "読み上げ中..." : "読み上げ"}
+          <button type="button" className="speak-btn" onClick={onSpeak} disabled={speaking}>
+            {speaking ? "読み上げ中..." : "🔊 読み上げ"}
           </button>
         </article>
       ) : (

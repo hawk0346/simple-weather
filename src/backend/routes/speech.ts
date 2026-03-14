@@ -7,29 +7,34 @@ const DEFAULT_SPEAKER = 1;
 
 export function registerSpeechRoute(app: Hono): void {
   app.get("/speech", async (context) => {
-    const parsed = speechQuerySchema.safeParse({
-      text: context.req.query("text"),
-      speaker: context.req.query("speaker"),
-    });
+    try {
+      const parsed = speechQuerySchema.safeParse({
+        text: context.req.query("text"),
+        speaker: context.req.query("speaker"),
+      });
 
-    if (!parsed.success) {
-      return jsonError(context, 400, "読み上げテキストが不正です。");
+      if (!parsed.success) {
+        return jsonError(context, 400, "読み上げテキストが不正です。");
+      }
+
+      const speaker = parsed.data.speaker ?? DEFAULT_SPEAKER;
+      const text = parsed.data.text;
+      const result = await synthesizeVoiceByVoicevox(text, speaker);
+
+      if (!result.ok) {
+        return jsonError(context, result.status, result.message);
+      }
+
+      return new Response(result.audio, {
+        status: 200,
+        headers: {
+          "Content-Type": "audio/wav",
+          "Cache-Control": "no-store",
+        },
+      });
+    } catch (err) {
+      console.error("[speech route error]", err);
+      return jsonError(context, 500, "VOICEVOXエンジンへの接続に失敗しました。エンジンが起動しているか確認してください。");
     }
-
-    const speaker = parsed.data.speaker ?? DEFAULT_SPEAKER;
-    const text = parsed.data.text;
-    const result = await synthesizeVoiceByVoicevox(text, speaker);
-
-    if (!result.ok) {
-      return jsonError(context, result.status, result.message);
-    }
-
-    return new Response(result.audio, {
-      status: 200,
-      headers: {
-        "Content-Type": "audio/wav",
-        "Cache-Control": "no-store",
-      },
-    });
   });
 }

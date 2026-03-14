@@ -4,9 +4,18 @@ services:
     command: /bin/sh -c "while sleep 1000; do :; done"
     volumes:
       - ..:/workspace:cached
+    depends_on:
+      voicevox-engine:
+        condition: service_healthy
 
   voicevox-engine:
     image: voicevox/voicevox_engine:cpu-latest
     restart: unless-stopped
     ports:
       - 127.0.0.1:50021:50021
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:50021/version"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
