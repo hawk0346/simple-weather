@@ -1,4 +1,5 @@
 import type { HistoryItem } from "../hooks/useSearchHistory";
+import CollapsibleSection from "./CollapsibleSection";
 
 type HistoryPanelProps = {
   history: HistoryItem[];
@@ -16,13 +17,16 @@ export default function HistoryPanel({
   if (history.length === 0) return null;
 
   return (
-    <section className="history-area" aria-label="検索履歴">
-      <div className="history-header">
-        <h2 className="section-title">検索履歴</h2>
+    <CollapsibleSection
+      title="検索履歴"
+      defaultOpen={false}
+      className="history-area"
+      actions={
         <button type="button" className="history-clear-btn" onClick={onClear}>
           全削除
         </button>
-      </div>
+      }
+    >
       <ul className="history-list">
         {history.map((item) => (
           <li key={item.id} className="history-item">
@@ -44,6 +48,6 @@ export default function HistoryPanel({
           </li>
         ))}
       </ul>
-    </section>
+    </CollapsibleSection>
   );
 }
