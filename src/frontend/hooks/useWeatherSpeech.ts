@@ -79,16 +79,17 @@ export function useWeatherSpeech(data: WeatherResponse | null) {
 
       audio.onended = () => {
         URL.revokeObjectURL(audioUrl);
+        setSpeaking(false);
       };
 
       audio.onerror = () => {
         URL.revokeObjectURL(audioUrl);
+        setSpeaking(false);
       };
 
       await audio.play();
     } catch {
       setSpeechError(SPEECH_ERROR_MESSAGE);
-    } finally {
       setSpeaking(false);
     }
   }
