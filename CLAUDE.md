@@ -73,6 +73,10 @@ src/
 4. `bun run dev:all` で起動
 5. 疎通確認: `curl -s http://voicevox-engine:50021/version`
 
+## GH_TOKEN セットアップ
+
+PR レビュースクリプト (`scripts/pr-review.sh`) の利用に必要。詳細は [CONTRIBUTING.md](CONTRIBUTING.md) を参照。
+
 ## 設計決定の記録
 
 - **Next.js 非採用**: Turbopack 問題回避 → Vite + Bun SPA 構成
