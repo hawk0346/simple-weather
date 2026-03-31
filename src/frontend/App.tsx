@@ -15,12 +15,13 @@ export default function App() {
   const { canInstall, install, dismiss } = usePwaInstall();
   const { history, addHistory, removeHistory, clearHistory } =
     useSearchHistory();
-  const { city, setCity, loading, error, data, onSubmit } =
+  const { city, setCity, loading, error, data, onSubmit, search } =
     useWeatherSearch(addHistory);
   const { speaking, speechError, speakWeather } = useWeatherSpeech(data);
 
   function handleHistorySelect(selectedCity: string) {
     setCity(selectedCity);
+    search(selectedCity);
   }
 
   return (
@@ -33,7 +34,7 @@ export default function App() {
       )}
       {canInstall && (
         <div className="install-banner" role="complementary">
-          <span>ホーム画面に追加してオフラインでも使えます</span>
+          <span>ホーム画面に追加できます</span>
           <div className="install-banner-actions">
             <button type="button" className="install-btn" onClick={install}>
               追加
@@ -71,6 +72,7 @@ export default function App() {
             data={data}
             speaking={speaking}
             onSpeak={speakWeather}
+            offline={!online}
           />
           <p className="credit-text">
             音声合成: <a href="https://voicevox.hiroshiba.jp/">VOICEVOX</a>

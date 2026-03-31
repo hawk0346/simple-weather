@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useId, useState } from "react";
 
 type CollapsibleSectionProps = {
   title: string;
@@ -34,6 +34,7 @@ export default function CollapsibleSection({
 }: CollapsibleSectionProps) {
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(defaultOpen);
+  const contentId = useId();
 
   const open = isMobile ? mobileOpen : true;
 
@@ -49,6 +50,7 @@ export default function CollapsibleSection({
           className="collapsible-toggle"
           onClick={toggle}
           aria-expanded={open}
+          aria-controls={contentId}
         >
           <span className={`collapsible-chevron ${open ? "is-open" : ""}`}>
             ▶
@@ -59,7 +61,11 @@ export default function CollapsibleSection({
           <div className="collapsible-actions">{actions}</div>
         ) : null}
       </div>
-      {open ? <div className="collapsible-body">{children}</div> : null}
+      {open ? (
+        <div id={contentId} className="collapsible-body">
+          {children}
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -21,10 +21,8 @@ export function usePwaInstall() {
   const install = async () => {
     if (!promptEvent) return;
     await promptEvent.prompt();
-    const { outcome } = await promptEvent.userChoice;
-    if (outcome === "accepted") {
-      setPromptEvent(null);
-    }
+    await promptEvent.userChoice;
+    setPromptEvent(null);
   };
 
   const dismiss = () => setPromptEvent(null);

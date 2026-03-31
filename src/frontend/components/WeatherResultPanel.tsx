@@ -6,6 +6,7 @@ type WeatherResultPanelProps = {
   data: WeatherResponse | null;
   speaking: boolean;
   onSpeak: () => void;
+  offline?: boolean;
 };
 
 function formatObservedAtJst(raw: string): string {
@@ -17,6 +18,7 @@ export default function WeatherResultPanel({
   data,
   speaking,
   onSpeak,
+  offline = false,
 }: WeatherResultPanelProps) {
   return (
     <CollapsibleSection title="検索結果" className="result-area">
@@ -40,7 +42,7 @@ export default function WeatherResultPanel({
             type="button"
             className="speak-btn"
             onClick={onSpeak}
-            disabled={speaking}
+            disabled={speaking || offline}
           >
             {speaking ? "読み上げ中..." : "🔊 読み上げ"}
           </button>
