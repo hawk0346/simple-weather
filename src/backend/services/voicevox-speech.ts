@@ -20,9 +20,19 @@ export async function synthesizeVoiceByVoicevox(
   audioQueryUrl.searchParams.set("speaker", String(speaker));
   audioQueryUrl.searchParams.set("text", text);
 
-  const audioQueryResponse = await fetch(audioQueryUrl, {
-    method: "POST",
-  });
+  let audioQueryResponse: Response;
+  try {
+    audioQueryResponse = await fetch(audioQueryUrl, {
+      method: "POST",
+      signal: AbortSignal.timeout(5000),
+    });
+  } catch {
+    return {
+      ok: false,
+      status: 502,
+      message: "VOICEVOXエンジンへの接続に失敗しました。エンジンが起動しているか確認してください。",
+    };
+  }
 
   if (!audioQueryResponse.ok) {
     return {
@@ -37,13 +47,21 @@ export async function synthesizeVoiceByVoicevox(
   const synthesisUrl = buildEngineUrl("synthesis");
   synthesisUrl.searchParams.set("speaker", String(speaker));
 
-  const synthesisResponse = await fetch(synthesisUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: queryJson,
-  });
+  let synthesisResponse: Response;
+  try {
+    synthesisResponse = await fetch(synthesisUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: queryJson,
+      signal: AbortSignal.timeout(10000),
+    });
+  } catch {
+    return {
+      ok: false,
+      status: 502,
+      message: "音声の生成に失敗しました。",
+    };
+  }
 
   if (!synthesisResponse.ok) {
     return {

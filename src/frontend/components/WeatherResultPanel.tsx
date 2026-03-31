@@ -1,10 +1,12 @@
 import type { WeatherResponse } from "../types/weather";
+import CollapsibleSection from "./CollapsibleSection";
 import WeatherIcon from "./WeatherIcon";
 
 type WeatherResultPanelProps = {
   data: WeatherResponse | null;
   speaking: boolean;
   onSpeak: () => void;
+  offline?: boolean;
 };
 
 function formatObservedAtJst(raw: string): string {
@@ -16,10 +18,10 @@ export default function WeatherResultPanel({
   data,
   speaking,
   onSpeak,
+  offline = false,
 }: WeatherResultPanelProps) {
   return (
-    <section className="result-area" aria-label="検索結果エリア">
-      <h2 className="section-title">検索結果</h2>
+    <CollapsibleSection title="検索結果" className="result-area">
       {data ? (
         <article className="weather-card">
           <header className="weather-header">
@@ -36,13 +38,18 @@ export default function WeatherResultPanel({
           <p>湿度: {data.current.humidity ?? "-"}%</p>
           <p>風速: {data.current.windSpeed ?? "-"} km/h</p>
           <p>観測時刻: {formatObservedAtJst(data.current.time)}</p>
-          <button type="button" onClick={onSpeak} disabled={speaking}>
-            {speaking ? "読み上げ中..." : "読み上げ"}
+          <button
+            type="button"
+            className="speak-btn"
+            onClick={onSpeak}
+            disabled={speaking || offline}
+          >
+            {speaking ? "読み上げ中..." : "🔊 読み上げ"}
           </button>
         </article>
       ) : (
         <p className="placeholder-text">検索するとここに結果が表示されます。</p>
       )}
-    </section>
+    </CollapsibleSection>
   );
 }

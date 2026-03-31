@@ -4,6 +4,7 @@ type SearchPanelProps = {
   city: string;
   loading: boolean;
   error: string | null;
+  offline?: boolean;
   onCityChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 };
@@ -12,6 +13,7 @@ export default function SearchPanel({
   city,
   loading,
   error,
+  offline = false,
   onCityChange,
   onSubmit,
 }: SearchPanelProps) {
@@ -25,8 +27,9 @@ export default function SearchPanel({
           value={city}
           onChange={(event) => onCityChange(event.target.value)}
           placeholder="東京"
+          disabled={offline}
         />
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading || offline}>
           {loading ? "取得中..." : "天気を取得"}
         </button>
       </form>

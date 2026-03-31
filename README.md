@@ -15,6 +15,10 @@
 ## Tailwind 運用メモ
 - Tailwind v4 は `src/index.css` の `@source` を正として運用し、`tailwind.config.js` の `content` は重複回避のため使用しない。
 
+## feature-dev エージェント
+
+コードベースを深く理解してから実装する 7 フェーズのワークフローエージェント。チャットのエージェント選択で **feature-dev** を選んで使用します。詳細は [docs/feature-dev.md](docs/feature-dev.md) を参照。
+
 ## AI補助コマンド（ローカル開発用）
 - 常時ルール: `.github/copilot-instructions.md`
 	- Copilot が参照するリポジトリ固有ルール（最小差分、UI制約、SVG `xmlns`、色は `tailwind-variants` など）

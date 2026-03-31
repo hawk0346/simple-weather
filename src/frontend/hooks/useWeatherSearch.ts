@@ -1,9 +1,9 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { toRomaji } from "wanakana";
+import { normalizeRomaji } from "../../shared/normalize-romaji";
 import type { ApiErrorResponse } from "../types/api";
 import type { WeatherResponse } from "../types/weather";
-import { normalizeRomaji } from "../../shared/normalize-romaji";
 
 const NOT_FOUND_MESSAGE = "検索結果がヒットしませんでした。";
 const WEATHER_FETCH_ERROR_MESSAGE = "天気情報の取得に失敗しました";
@@ -28,7 +28,7 @@ function resolveErrorMessage(
   return payload.message ?? WEATHER_FETCH_ERROR_MESSAGE;
 }
 
-export function useWeatherSearch() {
+export function useWeatherSearch(onSuccess?: (city: string) => void) {
   const [city, setCity] = useState("東京");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,10 +55,8 @@ export function useWeatherSearch() {
     return normalizeRomaji(toRomaji(input));
   }
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const normalizedCity = city.trim();
+  async function searchCity(targetCity: string) {
+    const normalizedCity = targetCity.trim();
     if (!normalizedCity) {
       setError("都市名を入力してください");
       return;
@@ -69,7 +67,6 @@ export function useWeatherSearch() {
 
     try {
       const originalCity = normalizedCity;
-      // Convert Japanese to romaji
       const romajiCity = await convertToRomaji(normalizedCity);
 
       const response = await fetch(buildWeatherQuery(romajiCity, originalCity));
@@ -84,12 +81,18 @@ export function useWeatherSearch() {
       }
 
       setData(json);
+      onSuccess?.(originalCity);
     } catch {
       setData(null);
       setError(API_CONNECTION_ERROR_MESSAGE);
     } finally {
       setLoading(false);
     }
+  }
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await searchCity(city);
   }
 
   return {
@@ -99,5 +102,6 @@ export function useWeatherSearch() {
     error,
     data,
     onSubmit,
+    search: searchCity,
   };
 }

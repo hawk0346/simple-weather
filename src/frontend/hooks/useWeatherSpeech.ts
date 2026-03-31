@@ -4,9 +4,7 @@ import type { WeatherResponse } from "../types/weather";
 
 const SPEECH_ERROR_MESSAGE = "読み上げ音声の生成に失敗しました";
 
-async function resolveSpeechErrorMessage(
-  response: Response,
-): Promise<string> {
+async function resolveSpeechErrorMessage(response: Response): Promise<string> {
   try {
     const payload = (await response.json()) as ApiErrorResponse;
     return payload.message || SPEECH_ERROR_MESSAGE;
@@ -62,6 +60,7 @@ export function useWeatherSpeech(data: WeatherResponse | null) {
     if (!data || speaking) return;
 
     setSpeaking(true);
+    let audioUrl: string | null = null;
     try {
       const params = new URLSearchParams({
         text: buildSpeechText(data),
@@ -74,21 +73,23 @@ export function useWeatherSpeech(data: WeatherResponse | null) {
       }
 
       const blob = await response.blob();
-      const audioUrl = URL.createObjectURL(blob);
+      audioUrl = URL.createObjectURL(blob);
       const audio = new Audio(audioUrl);
 
       audio.onended = () => {
-        URL.revokeObjectURL(audioUrl);
+        URL.revokeObjectURL(audioUrl as string);
+        setSpeaking(false);
       };
 
       audio.onerror = () => {
-        URL.revokeObjectURL(audioUrl);
+        URL.revokeObjectURL(audioUrl as string);
+        setSpeaking(false);
       };
 
       await audio.play();
     } catch {
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
       setSpeechError(SPEECH_ERROR_MESSAGE);
-    } finally {
       setSpeaking(false);
     }
   }
