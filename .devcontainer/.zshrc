@@ -19,7 +19,7 @@ bindkey '^[[F' end-of-line
 bindkey '^[[3~' delete-char
 
 # ---- Completion ----
-autoload -Uz compinit && compinit -C
+autoload -Uz compinit && compinit
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
@@ -48,7 +48,7 @@ alias gp='git pull'
 alias dev='bun run dev:all'
 alias t='bun test'
 alias tc='bunx tsc --noEmit'
-alias lint='bunx biome check src'
+alias lint='bun run lint'
 
 # ---- Environment ----
 export EDITOR=vi
