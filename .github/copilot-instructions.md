@@ -27,5 +27,8 @@
 - 天気アイコンの色トークンは `tailwind-variants` で管理する。
 - このリポジトリの inline SVG では `xmlns="http://www.w3.org/2000/svg"` を明示する。
 
+## セキュリティ・プライバシー
+- `get_terminal_output` ツールは使用しない。ターミナル出力にはシークレット（トークン・パスワード等）が含まれる可能性があるため。
+
 ## アーキテクチャ詳細
 - 詳細なコンポーネント・フック・API・データフローは `.github/skills/simple-weather/SKILL.md` を参照。
